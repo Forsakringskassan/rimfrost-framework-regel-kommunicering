@@ -1,0 +1,34 @@
+uppgift:
+  id: 3ab65a6c-ff44-471a-868a-7b7667f8847b
+  version: 1
+  path: /regel/kommunicering
+  aktivitet: "Kommunicering för"
+
+specifikation:
+  id: a42ffaed-2f20-47e8-8499-f2f79ae2f45f
+  version: 1
+  namn: "TestUppgiftNamn"
+  uppgiftbeskrivning: "TestUppgiftBeskrivning"
+  verksamhetslogik: C
+  roll: ANSVARIG_HANDLAGGARE
+  applikationsId: 3.5.1
+  applikationsversion: kommunicering_franvaro_1.0
+
+regel:
+  id: a11f3429-3a6b-4389-ba1c-c2747b0fb45b
+  version: 1
+  namn: "Har kunden varit frånvarande från arbete"
+  beskrivning: "Ring och kolla med arbetsgivaren om personen varit frånvarande från sitt arbete"
+
+lagrum:
+  id: f0c927a9-b995-4a12-b4fd-4bcbf4281b44
+  version: 1
+  giltigFom: "2010-02-11"
+  forfattning: "Husdjursbalken"
+  kapitel: 3
+  paragraf: 5
+  stycke: 1
+  punkt: 4
+
+utokadUppgiftsbeskrivning:
+  beskrivning: "TestUtokadUppgiftsbeskrivning"
