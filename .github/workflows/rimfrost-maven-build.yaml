@@ -37,5 +37,5 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ github.token }}
           MAVEN_OPTS: >-
-            -Dmaven.logger.log.org.eclipse.aether.internal.impl.DefaultUpdateCheckManager=error
-        run: ./mvnw --batch-mode verify
+            -Dorg.slf4j.simpleLogger.log.org.eclipse.aether.internal.impl.DefaultUpdateCheckManager=error
+        run: ./mvnw -U --batch-mode verify
