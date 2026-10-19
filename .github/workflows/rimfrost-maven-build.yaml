@@ -26,4 +26,4 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./mvnw -s settings.xml --batch-mode verify
+        run: ./mvnw -s settings.xml -U --batch-mode verify
