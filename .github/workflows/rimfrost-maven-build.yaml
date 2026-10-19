@@ -21,6 +21,13 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
+      
+      - name: Effective POM
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./mvnw -s settings.xml help:effective-pom \
+          -Doutput=effective-pom.xml
 
       - name: Build with Maven
         env:
