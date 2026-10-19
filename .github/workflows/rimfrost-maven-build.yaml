@@ -16,14 +16,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Setup Java and Maven
         uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '25'
 
+          mvn-server-credentials: |
+            github:GITHUB_ACTOR:GITHUB_TOKEN
+            github--Forsakringskassan--repository:GITHUB_ACTOR:GITHUB_TOKEN
+
+          mvn-repositories: |
+            github:https://maven.pkg.github.com/Forsakringskassan/*:true
+
+          mvn-repositories-include-central: true
+          mvn-repositories-prioritize-central: true
+
       - name: Build with Maven
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./mvnw -s settings.xml -U --batch-mode verify
+        run: ./mvnw --batch-mode verify
