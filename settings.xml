@@ -1,12 +1,7 @@
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
     <servers>
         <server>
-            <id>github</id>
-            <username>${env.GITHUB_ACTOR}</username>
-            <password>${env.GITHUB_TOKEN}</password>
-        </server>
-        <server>
-            <id>github--Forsakringskassan--repository</id>
+            <id>github--Forsakringskassan</id>
             <username>${env.GITHUB_ACTOR}</username>
             <password>${env.GITHUB_TOKEN}</password>
         </server>
@@ -14,10 +9,10 @@
 
     <profiles>
         <profile>
-            <id>github</id>
+            <id>github--Forsakringskassan</id>
             <repositories>
                 <repository>
-                    <id>github</id>
+                    <id>github--Forsakringskassan</id>
                     <url>https://maven.pkg.github.com/forsakringskassan/*</url>
                 </repository>
             </repositories>
@@ -25,6 +20,6 @@
     </profiles>
 
     <activeProfiles>
-        <activeProfile>github</activeProfile>
+        <activeProfile>github--Forsakringskassan</activeProfile>
     </activeProfiles>
 </settings>

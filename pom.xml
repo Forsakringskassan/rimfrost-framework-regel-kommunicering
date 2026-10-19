@@ -17,8 +17,8 @@
 
   <distributionManagement>
     <repository>
-      <id>github--Forsakringskassan--repository</id>
-      <url>https://maven.pkg.github.com/Forsakringskassan/repository</url>
+      <id>github--Forsakringskassan</id>
+      <url>https://maven.pkg.github.com/Forsakringskassan/rimfrost-framework-regel-kommunicering</url>
     </repository>
   </distributionManagement>
 
@@ -104,8 +104,8 @@
       <url>https://repo.maven.apache.org/maven2</url>
     </repository>
     <repository>
-      <id>github--Forsakringskassan--repository</id>
-      <url>https://maven.pkg.github.com/Forsakringskassan/repository</url>
+      <id>github--Forsakringskassan</id>
+      <url>https://maven.pkg.github.com/forsakringskassan/*</url>
     </repository>
   </repositories>
 

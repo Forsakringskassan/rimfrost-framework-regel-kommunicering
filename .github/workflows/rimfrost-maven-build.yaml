@@ -22,28 +22,8 @@ jobs:
           distribution: temurin
           java-version: '25'
 
-      - name: Test GitHub Packages access
+      - name: Build with Maven
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          ./mvnw -s settings.xml -U --batch-mode \
-            dependency:get \
-            -Dartifact=se.fk.rimfrost.framework.regel.maskinell:rimfrost-framework-regel-maskinell:1.1.2 \
-            -Dtransitive=false
-
-      - name: Generate effective POM
-        env:
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          ./mvnw -s settings.xml help:effective-pom \
-            -Dverbose \
-            -Doutput=effective-pom.xml
-
-      - name: Upload effective POM
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: effective-pom
-          path: effective-pom.xml
+        run: ./mvnw -s settings.xml -U --batch-mode verify
