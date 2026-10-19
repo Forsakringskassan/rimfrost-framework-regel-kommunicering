@@ -98,17 +98,6 @@
     </dependency>
   </dependencies>
 
-  <repositories>
-    <repository>
-      <id>central</id>
-      <url>https://repo.maven.apache.org/maven2</url>
-    </repository>
-    <repository>
-      <id>github--Forsakringskassan</id>
-      <url>https://maven.pkg.github.com/forsakringskassan/*</url>
-    </repository>
-  </repositories>
-
   <build>
     <plugins>
       <plugin>
