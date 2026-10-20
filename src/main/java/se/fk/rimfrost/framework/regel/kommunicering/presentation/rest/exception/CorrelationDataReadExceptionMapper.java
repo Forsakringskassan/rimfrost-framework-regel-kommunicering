@@ -7,7 +7,7 @@ import se.fk.rimfrost.framework.regel.kommunicering.logic.exception.CorrelationD
 import se.fk.rimfrost.framework.regel.oul.jaxrsspec.controllers.generatedsource.model.ErrorResponse;
 
 /**
- * Maps {@link CorrelationDataReadException} to HTTP 409 Conflict.
+ * Maps {@link CorrelationDataReadException} to HTTP 500 Internal Server Error.
  */
 @Provider
 public class CorrelationDataReadExceptionMapper implements ExceptionMapper<CorrelationDataReadException>
@@ -16,10 +16,12 @@ public class CorrelationDataReadExceptionMapper implements ExceptionMapper<Corre
    @Override
    public Response toResponse(final CorrelationDataReadException exception)
    {
+      var responseStatus = Response.Status.INTERNAL_SERVER_ERROR;
+
       ErrorResponse errorResponse = new ErrorResponse();
-      errorResponse.setCode(Response.Status.CONFLICT.getStatusCode());
+      errorResponse.setCode(responseStatus.getStatusCode());
       errorResponse.setMessage("Failed to read correlation data");
 
-      return Response.status(Response.Status.CONFLICT).entity(errorResponse).build();
+      return Response.status(responseStatus).entity(errorResponse).build();
    }
 }
