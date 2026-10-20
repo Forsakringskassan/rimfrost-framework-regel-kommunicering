@@ -16,8 +16,6 @@ import se.fk.rimfrost.framework.regel.error.RegelFelkod;
 import se.fk.rimfrost.framework.regel.integration.kafka.dto.ImmutableRegelResponse;
 import se.fk.rimfrost.framework.regel.kommunicering.logic.exception.CorrelationDataReadException;
 import se.fk.rimfrost.framework.regel.kommunicering.logic.exception.EndOulUppgiftException;
-import se.fk.rimfrost.framework.regel.kommunicering.logic.exception.HandlaggningNotFoundException;
-import se.fk.rimfrost.framework.regel.kommunicering.logic.exception.HandlaggningReadException;
 import se.fk.rimfrost.framework.regel.kommunicering.logic.exception.UppgiftIncompleteException;
 import se.fk.rimfrost.framework.regel.logic.RegelCancelledException;
 import se.fk.rimfrost.framework.regel.logic.RegelRequestHandlerBase;
@@ -94,17 +92,16 @@ public class RegelKommuniceringRequestHandler extends RegelRequestHandlerBase
    }
 
    @Override
-   public void handleKommuniceringDone(UUID handlaggningId)
+   public void handleKommuniceringDone(Handlaggning handlaggning)
    {
-      var correlationData = getCorrelationData(handlaggningId);
-      var handlaggning = getHandlaggning(handlaggningId);
-      var utfall = getUtfall(correlationData, handlaggningId);
+      var correlationData = getCorrelationData(handlaggning.id());
+      var utfall = getUtfall(correlationData, handlaggning.id());
 
-      endOulUppgift(correlationData.oulUppgiftId(), handlaggningId);
+      endOulUppgift(correlationData.oulUppgiftId(), handlaggning.id());
 
-      sendRegelSuccessResponse(handlaggningId, correlationData.cloudEventData(), utfall, correlationData.replyTopic());
+      sendRegelSuccessResponse(handlaggning.id(), correlationData.cloudEventData(), utfall, correlationData.replyTopic());
 
-      oulUppgiftService.cleanupCorrelation(handlaggningId);
+      oulUppgiftService.cleanupCorrelation(handlaggning.id());
 
       var uppgift = correlationData.uppgift();
       var updatedUppgift = ImmutableUppgift.builder()
@@ -118,7 +115,7 @@ public class RegelKommuniceringRequestHandler extends RegelRequestHandlerBase
             .uppgift(updatedUppgift)
             .build();
 
-      tryUpdateHandlaggning(handlaggningUpdate, handlaggningId);
+      tryUpdateHandlaggning(handlaggningUpdate, handlaggning.id());
    }
 
    private void sendRegelSuccessResponse(UUID handlaggningId,
@@ -161,27 +158,6 @@ public class RegelKommuniceringRequestHandler extends RegelRequestHandlerBase
       }
 
       return correlationData;
-   }
-
-   private Handlaggning getHandlaggning(UUID handlaggningId)
-   {
-      try
-      {
-         return handlaggningAdapter.readHandlaggning(handlaggningId);
-      }
-      catch (HandlaggningException e)
-      {
-         LOGGER.error("Failed to read handlaggning with id: {}", handlaggningId, e);
-
-         if (e.getErrorType() == HandlaggningException.ErrorType.NOT_FOUND)
-         {
-            throw new HandlaggningNotFoundException(e.getMessage(), e);
-         }
-         else
-         {
-            throw new HandlaggningReadException(e.getMessage(), e);
-         }
-      }
    }
 
    private Utfall getUtfall(OulCorrelationData correlationData, UUID handlaggningId)
