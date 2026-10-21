@@ -16,15 +16,18 @@ import se.fk.rimfrost.adapter.permissions.adapter.PermissionsAdapter;
 import se.fk.rimfrost.adapter.permissions.adapter.PermissionsException;
 import se.fk.rimfrost.framework.handlaggning.adapter.HandlaggningAdapter;
 import se.fk.rimfrost.framework.handlaggning.model.Handlaggning;
+import se.fk.rimfrost.framework.handlaggning.model.Uppgift;
 import se.fk.rimfrost.framework.handlaggning.model.Yrkande;
-import se.fk.rimfrost.adapter.identity.adapter.IdentityAdapter;
 import se.fk.rimfrost.adapter.identity.exception.IdentityException;
 import se.fk.rimfrost.framework.regel.kommunicering.logic.RegelKommuniceringService;
+import se.fk.rimfrost.framework.regel.oul.jaxrsspec.controllers.generatedsource.model.ErrorResponse;
 import se.fk.rimfrost.framework.regel.oul.logic.entity.OulCorrelationData;
 import se.fk.rimfrost.framework.sid.adapter.SidAdapter;
 import se.fk.rimfrost.framework.sid.exception.SidException;
 import se.fk.rimfrost.adapter.identity.model.ImmutableIdtyp;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -33,6 +36,9 @@ import static org.mockito.Mockito.verify;
 @QuarkusTest
 class RegelKommuniceringControllerSidCheckTest extends AbstractRegelKommuniceringTestBase
 {
+   private static final String NO_SID_PERMISSION_PATTERN = "(?i).*does not have permission to access this uppgift.*";
+   private static final String UNRESOLVED_IDENTITY_PATTERN = "(?i).*could not resolve user identity.*";
+
    @InjectMock
    HandlaggningAdapter handlaggningAdapter;
 
@@ -40,31 +46,10 @@ class RegelKommuniceringControllerSidCheckTest extends AbstractRegelKommunicerin
    SidAdapter sidAdapter;
 
    @InjectMock
-   IdentityAdapter identityAdapter;
-
-   @InjectMock
    PermissionsAdapter permissionsAdapter;
 
    @InjectMock
    RegelKommuniceringService<String, String> regelKommuniceringService;
-
-   @Test
-   @DisplayName("FRKOMM-FR-04.14: GET returnerar 403 när SID detekteras men handläggarens identitet inte kan lösas")
-   void get_should_return_403_when_sid_detected_and_identity_unresolvable() throws Exception
-   {
-      var handlaggning = createHandlaggning();
-      Mockito.when(handlaggningAdapter.readHandlaggning(any())).thenReturn(handlaggning);
-      Mockito.when(sidAdapter.containsSid(any())).thenReturn(true);
-      Mockito.doThrow(new IdentityException(IdentityException.ErrorType.UNAUTHORIZED, "no token"))
-            .when(identityAdapter).getIdentity(any());
-
-      RestAssured.given()
-            .get("/api/test/" + UUID.randomUUID())
-            .then()
-            .statusCode(403);
-
-      verify(regelKommuniceringService, never()).read(any());
-   }
 
    @Test
    @DisplayName("FRKOMM-FR-04.3: GET returnerar 403 när SID detekteras och handläggaren saknar SID-rättigheter")
@@ -76,10 +61,13 @@ class RegelKommuniceringControllerSidCheckTest extends AbstractRegelKommunicerin
       givenHandlaggareIdentity("PERSONNR", "19901010-1234");
       Mockito.when(permissionsAdapter.hasSidPermission(any(), any())).thenReturn(false);
 
-      RestAssured.given()
+      var response = RestAssured.given()
             .get("/api/test/" + UUID.randomUUID())
             .then()
-            .statusCode(403);
+            .statusCode(403).extract().as(ErrorResponse.class);
+
+      assertEquals(403, response.getCode());
+      assertTrue(response.getMessage().matches(NO_SID_PERMISSION_PATTERN));
 
       verify(regelKommuniceringService, never()).read(any());
    }
@@ -94,10 +82,13 @@ class RegelKommuniceringControllerSidCheckTest extends AbstractRegelKommunicerin
       givenHandlaggareIdentity("PERSONNR", "19901010-1234");
       Mockito.when(permissionsAdapter.hasSidPermission(any(), any())).thenReturn(false);
 
-      RestAssured.given()
+      var response = RestAssured.given()
             .get("/api/test/" + UUID.randomUUID())
             .then()
-            .statusCode(403);
+            .statusCode(403).extract().as(ErrorResponse.class);
+
+      assertEquals(403, response.getCode());
+      assertTrue(response.getMessage().matches(NO_SID_PERMISSION_PATTERN));
 
       verify(oulUppgiftService).tryUnassignOulUppgift(eq(DEFAULT_UPPGIFT_ID));
    }
@@ -123,7 +114,7 @@ class RegelKommuniceringControllerSidCheckTest extends AbstractRegelKommunicerin
    }
 
    @Test
-   @DisplayName("FRKOMM-FR-04.9: hasSidPermission anropas med handläggarens identitet från IdentityAdapter när SID detekteras")
+   @DisplayName("FRKOMM-FR-04.9: hasSidPermission anropas med handläggarens identitet från UserIdentityHolder när SID detekteras")
    void get_should_check_permission_with_handlaggare_identity_when_sid_detected() throws Exception
    {
       var handlaggning = createHandlaggning();
@@ -132,10 +123,13 @@ class RegelKommuniceringControllerSidCheckTest extends AbstractRegelKommunicerin
       givenHandlaggareIdentity("PERSONNR", "19901010-1234");
       Mockito.when(permissionsAdapter.hasSidPermission(any(), any())).thenReturn(false);
 
-      RestAssured.given()
+      var response = RestAssured.given()
             .get("/api/test/" + UUID.randomUUID())
             .then()
-            .statusCode(403);
+            .statusCode(403).extract().as(ErrorResponse.class);
+
+      assertEquals(403, response.getCode());
+      assertTrue(response.getMessage().matches(NO_SID_PERMISSION_PATTERN));
 
       verify(permissionsAdapter).hasSidPermission(eq("PERSONNR"), eq("19901010-1234"));
    }
@@ -151,10 +145,13 @@ class RegelKommuniceringControllerSidCheckTest extends AbstractRegelKommunicerin
       Mockito.when(permissionsAdapter.hasSidPermission(any(), any())).thenReturn(false);
       givenStoredOulUppgiftId(null);
 
-      RestAssured.given()
+      var response = RestAssured.given()
             .get("/api/test/" + UUID.randomUUID())
             .then()
-            .statusCode(403);
+            .statusCode(403).extract().as(ErrorResponse.class);
+
+      assertEquals(403, response.getCode());
+      assertTrue(response.getMessage().matches(NO_SID_PERMISSION_PATTERN));
 
       verify(oulUppgiftService, never()).tryUnassignOulUppgift(any());
    }
@@ -170,10 +167,13 @@ class RegelKommuniceringControllerSidCheckTest extends AbstractRegelKommunicerin
       Mockito.when(permissionsAdapter.hasSidPermission(any(), any())).thenReturn(false);
       Mockito.doNothing().when(oulUppgiftService).tryUnassignOulUppgift(any());
 
-      RestAssured.given()
+      var response = RestAssured.given()
             .get("/api/test/" + UUID.randomUUID())
             .then()
-            .statusCode(403);
+            .statusCode(403).extract().as(ErrorResponse.class);
+
+      assertEquals(403, response.getCode());
+      assertTrue(response.getMessage().matches(NO_SID_PERMISSION_PATTERN));
    }
 
    @ParameterizedTest
@@ -183,32 +183,47 @@ class RegelKommuniceringControllerSidCheckTest extends AbstractRegelKommunicerin
          throws Exception
    {
       var handlaggning = createHandlaggning();
+      var exceptionMessage = "permissions error";
       Mockito.when(handlaggningAdapter.readHandlaggning(any())).thenReturn(handlaggning);
       Mockito.when(sidAdapter.containsSid(any())).thenReturn(true);
       givenHandlaggareIdentity("PERSONNR", "19901010-1234");
-      Mockito.doThrow(new PermissionsException(errorType, "permissions error"))
+      Mockito.doThrow(new PermissionsException(errorType, exceptionMessage))
             .when(permissionsAdapter).hasSidPermission(any(), any());
 
-      RestAssured.given()
+      var response = RestAssured.given()
             .get("/api/test/" + UUID.randomUUID())
             .then()
-            .statusCode(expectedHttpStatus(errorType.name()));
+            .statusCode(expectedHttpStatus(errorType.name())).extract().as(ErrorResponse.class);
+
+      assertEquals(expectedHttpStatus(errorType.name()), response.getCode());
+      assertEquals(exceptionMessage, response.getMessage());
    }
 
    @ParameterizedTest
    @EnumSource(IdentityException.ErrorType.class)
-   @DisplayName("FRKOMM-FR-03.12-15: Fel från identity-tjänsten mappas till väldefinierade HTTP-statuskoder")
+   @DisplayName("FRKOMM-FR-06.1, FRKOMM-FR-03.12-15: Fel från identity-tjänsten mappas till väldefinierade HTTP-statuskoder")
    void get_should_return_mapped_status_when_identity_throws(IdentityException.ErrorType errorType) throws Exception
    {
       var handlaggning = createHandlaggning();
+      var exceptionMessage = "identity error";
       Mockito.when(handlaggningAdapter.readHandlaggning(any())).thenReturn(handlaggning);
       Mockito.when(sidAdapter.containsSid(any())).thenReturn(true);
-      Mockito.doThrow(new IdentityException(errorType, "identity error")).when(identityAdapter).getIdentity(any());
+      Mockito.doThrow(new IdentityException(errorType, exceptionMessage)).when(identityAdapter).getIdentity(any());
 
-      RestAssured.given()
+      var response = RestAssured.given()
             .get("/api/test/" + UUID.randomUUID())
             .then()
-            .statusCode(expectedHttpStatus(errorType.name()));
+            .statusCode(expectedHttpStatus(errorType.name())).extract().as(ErrorResponse.class);
+
+      assertEquals(expectedHttpStatus(errorType.name()), response.getCode());
+      if (errorType == IdentityException.ErrorType.UNAUTHORIZED)
+      {
+         assertTrue(response.getMessage().matches(UNRESOLVED_IDENTITY_PATTERN));
+      }
+      else
+      {
+         assertEquals(exceptionMessage, response.getMessage());
+      }
    }
 
    @ParameterizedTest
@@ -217,13 +232,17 @@ class RegelKommuniceringControllerSidCheckTest extends AbstractRegelKommunicerin
    void get_should_return_mapped_status_when_sid_throws(SidException.ErrorType errorType) throws Exception
    {
       var handlaggning = createHandlaggning();
+      var exceptionMessage = "sid error";
       Mockito.when(handlaggningAdapter.readHandlaggning(any())).thenReturn(handlaggning);
-      Mockito.doThrow(new SidException(errorType, "sid error")).when(sidAdapter).containsSid(any());
+      Mockito.doThrow(new SidException(errorType, exceptionMessage)).when(sidAdapter).containsSid(any());
 
-      RestAssured.given()
+      var response = RestAssured.given()
             .get("/api/test/" + UUID.randomUUID())
             .then()
-            .statusCode(expectedHttpStatus(errorType.name()));
+            .statusCode(expectedHttpStatus(errorType.name())).extract().as(ErrorResponse.class);
+
+      assertEquals(expectedHttpStatus(errorType.name()), response.getCode());
+      assertEquals(exceptionMessage, response.getMessage());
    }
 
    private void givenHandlaggareIdentity(String typId, String varde) throws IdentityException
@@ -234,8 +253,13 @@ class RegelKommuniceringControllerSidCheckTest extends AbstractRegelKommunicerin
 
    private void givenStoredOulUppgiftId(UUID oulUppgiftId)
    {
+      var utforare = se.fk.rimfrost.framework.handlaggning.model.ImmutableIdtyp.builder().typId(ID_TYP).varde(ID_VARDE)
+            .build();
+      var uppgift = Mockito.mock(Uppgift.class);
+      Mockito.when(uppgift.utforare()).thenReturn(utforare);
       var correlationData = Mockito.mock(OulCorrelationData.class);
       Mockito.when(correlationData.oulUppgiftId()).thenReturn(oulUppgiftId);
+      Mockito.when(correlationData.uppgift()).thenReturn(uppgift);
       Mockito.when(oulUppgiftService.getCorrelationData(any())).thenReturn(correlationData);
    }
 
@@ -250,6 +274,6 @@ class RegelKommuniceringControllerSidCheckTest extends AbstractRegelKommunicerin
 
    private static int expectedHttpStatus(String errorType)
    {
-      return switch(errorType){case"NOT_FOUND"->404;case"BAD_REQUEST"->400;case"SERVICE_UNAVAILABLE"->503;case"UNAUTHORIZED"->403;default->500;};
+      return switch(errorType){case"NOT_FOUND"->404;case"BAD_REQUEST"->400;case"SERVICE_UNAVAILABLE"->503;case"UNAUTHORIZED"->401;default->500;};
    }
 }
