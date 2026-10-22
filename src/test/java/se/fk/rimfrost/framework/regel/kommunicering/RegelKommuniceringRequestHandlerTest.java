@@ -69,7 +69,7 @@ class RegelKommuniceringRequestHandlerTest extends AbstractRegelKommuniceringTes
    }
 
    @Test
-   @DisplayName("FRKOMM-FR-02.1: OUL uppgift is created")
+   @DisplayName("FRKOMM-FR-02.1 & FRKOMM-FR-05.1: OUL uppgift is created, without processvyUrl when the regel request has none")
    void should_create_oul_task() throws Exception
    {
       var handlaggningId = UUID.randomUUID();
