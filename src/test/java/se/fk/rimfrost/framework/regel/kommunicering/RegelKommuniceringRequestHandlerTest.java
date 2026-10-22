@@ -14,6 +14,8 @@ import se.fk.rimfrost.framework.handlaggning.model.HandlaggningUpdate;
 import se.fk.rimfrost.framework.handlaggning.model.ImmutableRegelutfall;
 import se.fk.rimfrost.framework.handlaggning.model.ImmutableUppgift;
 import se.fk.rimfrost.framework.handlaggning.model.Yrkande;
+import se.fk.rimfrost.framework.regel.RegelKafkaConnector;
+import se.fk.rimfrost.framework.regel.RegelTestData;
 import se.fk.rimfrost.framework.regel.Utfall;
 import se.fk.rimfrost.framework.regel.error.RegelFelkod;
 import se.fk.rimfrost.framework.regel.kommunicering.logic.RegelKommuniceringRequestHandler;
@@ -31,6 +33,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
@@ -97,6 +100,31 @@ class RegelKommuniceringRequestHandlerTest extends AbstractRegelKommuniceringTes
       assertNotNull(oulUppgiftSpec.erbjudande());
       assertEquals(UUID.fromString("a42ffaed-2f20-47e8-8499-f2f79ae2f45f"), oulUppgiftSpec.uppgiftSpecifikationId());
       assertEquals(1, oulUppgiftSpec.uppgiftSpecifikationVersion());
+      assertNull(oulUppgiftSpec.processvyUrl());
+   }
+
+   @Test
+   @DisplayName("FRKOMM-FR-05.1: OUL uppgift is created with processvyUrl from the regel request")
+   void should_create_oul_task_with_processvy_url() throws Exception
+   {
+      var handlaggningId = UUID.randomUUID();
+      var handlaggning = createHandlaggning();
+
+      Mockito.when(handlaggningAdapter.readHandlaggning(handlaggningId)).thenReturn(handlaggning);
+
+      var captor = ArgumentCaptor.forClass(OulUppgiftSpec.class);
+      Mockito.doNothing().when(oulUppgiftService).createOulUppgift(captor.capture());
+
+      var payload = RegelTestData.newRegelRequestMessagePayload(handlaggningId.toString(), responseTopic);
+      payload.getData().setProcessvyUrl("/process/vah");
+      inMemoryConnector.source(RegelKafkaConnector.regelRequestsChannel).send(payload);
+
+      verify(oulUppgiftService, timeout(5000)).createOulUppgift(Mockito.any());
+      var oulUppgiftSpec = captor.getValue();
+
+      assertEquals(handlaggningId, oulUppgiftSpec.handlaggningId());
+      assertEquals(UUID.fromString(payload.getData().getAktivitetId()), oulUppgiftSpec.aktivitetId());
+      assertEquals("/process/vah", oulUppgiftSpec.processvyUrl());
    }
 
    @Test
