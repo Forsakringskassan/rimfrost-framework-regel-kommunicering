@@ -130,6 +130,9 @@ med `uppgiftId`. Svaret bär därför den data som BFF:en inte själv har (FKPOC
 - **FRKOMM-FR-07.3** `informationsaccess.regelId` och `informationsaccess.regelVersion` ska hämtas
   från regelns `config.yaml`.
 - **FRKOMM-FR-07.4** Containern ska bara returneras när SID-kontrollen har passerat.
+- **FRKOMM-FR-07.5** `informationsaccess.anvandare` ska vara den inloggade handläggarens
+  identitet (`typId` och `varde`), som ramverket hämtar enligt FRKOMM-FR-06. Då behöver
+  BFF:en inte själv tolka token.
 
 ## 2. Icke-funktionella krav
 
