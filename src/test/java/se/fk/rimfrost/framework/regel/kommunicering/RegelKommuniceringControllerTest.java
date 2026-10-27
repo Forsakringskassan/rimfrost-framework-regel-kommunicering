@@ -29,6 +29,8 @@ import se.fk.rimfrost.framework.sid.adapter.SidAdapter;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -189,6 +191,87 @@ public class RegelKommuniceringControllerTest extends AbstractRegelKommunicering
       verify(handlaggningAdapter).readHandlaggning(handlaggningId);
       verify(sidAdapter).containsSid(Mockito.anyList());
       verify(regelKommuniceringService).read(any());
+   }
+
+   @Test
+   @DisplayName("FRKOMM-FR-07.1: GET returns the rule's response in data together with informationsaccess")
+   void should_return_rule_response_as_data_with_informationsaccess_on_get() throws Exception
+   {
+      var handlaggningId = givenReadableHandlaggning();
+
+      RestAssured.given()
+            .get("/api/test/" + handlaggningId)
+            .then()
+            .statusCode(200)
+            .body("data", equalTo("response"))
+            .body("informationsaccess", notNullValue());
+   }
+
+   @Test
+   @DisplayName("FRKOMM-FR-07.2: informationsaccess.uppgiftId is the OUL uppgift id from the correlation data")
+   void should_return_oul_uppgift_id_in_informationsaccess_on_get() throws Exception
+   {
+      var handlaggningId = givenReadableHandlaggning();
+
+      RestAssured.given()
+            .get("/api/test/" + handlaggningId)
+            .then()
+            .statusCode(200)
+            .body("informationsaccess.uppgiftId", equalTo(DEFAULT_UPPGIFT_ID.toString()));
+   }
+
+   @Test
+   @DisplayName("FRKOMM-FR-07.2: GET returns 500 and does not read data when no correlation data is stored")
+   void should_return_500_without_correlation_data_on_get() throws Exception
+   {
+      var handlaggningId = givenReadableHandlaggning();
+      Mockito.when(oulUppgiftService.getCorrelationData(Mockito.any())).thenReturn(null);
+
+      RestAssured.given()
+            .get("/api/test/" + handlaggningId)
+            .then()
+            .statusCode(500);
+
+      verify(regelKommuniceringService, never()).read(any());
+   }
+
+   @Test
+   @DisplayName("FRKOMM-FR-07.3: informationsaccess.regelId and regelVersion come from the rule's config.yaml")
+   void should_return_regel_id_and_version_from_config_on_get() throws Exception
+   {
+      var handlaggningId = givenReadableHandlaggning();
+
+      // Values from src/test/resources/config-test.yaml
+      RestAssured.given()
+            .get("/api/test/" + handlaggningId)
+            .then()
+            .statusCode(200)
+            .body("informationsaccess.regelId", equalTo("a11f3429-3a6b-4389-ba1c-c2747b0fb45b"))
+            .body("informationsaccess.regelVersion", equalTo("1"));
+   }
+
+   @Test
+   @DisplayName("FRKOMM-FR-07.5: informationsaccess.anvandare is the inloggad handläggare's identity")
+   void should_return_handlaggare_identity_in_informationsaccess_on_get() throws Exception
+   {
+      var handlaggningId = givenReadableHandlaggning();
+
+      RestAssured.given()
+            .get("/api/test/" + handlaggningId)
+            .then()
+            .statusCode(200)
+            .body("informationsaccess.anvandare.typId", equalTo(ID_TYP))
+            .body("informationsaccess.anvandare.varde", equalTo(ID_VARDE));
+   }
+
+   private UUID givenReadableHandlaggning() throws Exception
+   {
+      var handlaggningId = UUID.randomUUID();
+      var handlaggning = createHandlaggning(handlaggningId);
+      Mockito.when(handlaggningAdapter.readHandlaggning(handlaggningId)).thenReturn(handlaggning);
+      Mockito.when(sidAdapter.containsSid(Mockito.anyList())).thenReturn(false);
+      Mockito.when(regelKommuniceringService.read(any())).thenReturn("response");
+      return handlaggningId;
    }
 
    @Test

@@ -22,8 +22,12 @@ import se.fk.rimfrost.framework.regel.Utfall;
 import se.fk.rimfrost.framework.regel.integration.config.RegelConfigProvider;
 import se.fk.rimfrost.framework.regel.kommunicering.logic.RegelKommuniceringService;
 import se.fk.rimfrost.framework.regel.kommunicering.logic.RegelKommuniceringDoneHandler;
+import se.fk.rimfrost.framework.regel.kommunicering.logic.dto.Anvandare;
+import se.fk.rimfrost.framework.regel.kommunicering.logic.dto.Informationsaccess;
+import se.fk.rimfrost.framework.regel.kommunicering.logic.dto.RegelKommuniceringReadResponse;
 import se.fk.rimfrost.framework.regel.kommunicering.logic.exception.CorrelationDataReadException;
 import se.fk.rimfrost.framework.regel.kommunicering.presentation.rest.guard.RegelAccessGuard;
+import se.fk.rimfrost.framework.regel.kommunicering.presentation.rest.identity.UserIdentityHolder;
 import se.fk.rimfrost.framework.regel.kommuniceringsutfall.jaxrsspec.controllers.generatedsource.KommuniceringsutfallControllerApi;
 import se.fk.rimfrost.framework.regel.kommuniceringsutfall.jaxrsspec.controllers.generatedsource.model.Kommuniceringsutfall;
 import se.fk.rimfrost.framework.regel.kommuniceringsutfall.jaxrsspec.controllers.generatedsource.model.PatchKommuniceringsutfallRequest;
@@ -71,14 +75,18 @@ public abstract class RegelKommuniceringController<T, Y>
    @Inject
    RegelAccessGuard regelAccessGuard;
 
+   @Inject
+   UserIdentityHolder userIdentityHolder;
+
    @GET
    @Path("/{handlaggningId}")
    public Response getKommunicering(@PathParam("handlaggningId") UUID handlaggningId)
    {
       var handlaggning = fetchHandlaggning(handlaggningId);
       regelAccessGuard.verifyAccess(handlaggning);
-      var response = regelKommuniceringService.read(handlaggning);
-      return Response.ok(response).build();
+      var informationsaccess = buildInformationsaccess(handlaggningId);
+      var data = regelKommuniceringService.read(handlaggning);
+      return Response.ok(new RegelKommuniceringReadResponse<>(data, informationsaccess)).build();
    }
 
    @PATCH
@@ -182,6 +190,27 @@ public abstract class RegelKommuniceringController<T, Y>
       var handlaggning = fetchHandlaggning(handlaggningId);
       regelAccessGuard.verifyAccess(handlaggning);
       regelKommuniceringDoneHandler.handleKommuniceringDone(handlaggning);
+   }
+
+   /**
+    * Builds the informationsaccess data returned alongside the rule-specific response (FRKOMM-FR-07).
+    * Runs after {@link RegelAccessGuard#verifyAccess}, so correlation data and the handläggare's
+    * identity are already known to be present.
+    */
+   private Informationsaccess buildInformationsaccess(UUID handlaggningId)
+   {
+      var correlation = oulUppgiftService.getCorrelationData(handlaggningId);
+      if (correlation == null)
+      {
+         throw new CorrelationDataReadException("Correlation data not found");
+      }
+      var identity = userIdentityHolder.getIdentity();
+      var regel = regelConfigProvider.getConfig().getRegel();
+      return new Informationsaccess(
+            correlation.oulUppgiftId(),
+            regel.getId(),
+            String.valueOf(regel.getVersion()),
+            new Anvandare(identity.typId(), identity.varde()));
    }
 
    private Handlaggning fetchHandlaggning(UUID handlaggningId)

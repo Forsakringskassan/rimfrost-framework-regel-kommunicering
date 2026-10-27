@@ -26,6 +26,8 @@ import se.fk.rimfrost.framework.sid.adapter.SidAdapter;
 import se.fk.rimfrost.framework.sid.exception.SidException;
 import se.fk.rimfrost.adapter.identity.model.ImmutableIdtyp;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,6 +70,25 @@ class RegelKommuniceringControllerSidCheckTest extends AbstractRegelKommunicerin
 
       assertEquals(403, response.getCode());
       assertTrue(response.getMessage().matches(NO_SID_PERMISSION_PATTERN));
+
+      verify(regelKommuniceringService, never()).read(any());
+   }
+
+   @Test
+   @DisplayName("FRKOMM-FR-07.4: GET returnerar inte informationsaccess när SID-kontrollen inte passerar")
+   void get_should_not_return_informationsaccess_when_sid_check_fails() throws Exception
+   {
+      var handlaggning = createHandlaggning();
+      Mockito.when(handlaggningAdapter.readHandlaggning(any())).thenReturn(handlaggning);
+      Mockito.when(sidAdapter.containsSid(any())).thenReturn(true);
+      givenHandlaggareIdentity("PERSONNR", "19901010-1234");
+      Mockito.when(permissionsAdapter.hasSidPermission(any(), any())).thenReturn(false);
+
+      RestAssured.given()
+            .get("/api/test/" + UUID.randomUUID())
+            .then()
+            .statusCode(403)
+            .body(not(containsString("informationsaccess")));
 
       verify(regelKommuniceringService, never()).read(any());
    }
