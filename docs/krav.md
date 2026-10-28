@@ -33,7 +33,8 @@ underliggande ramverk upprepas inte.
 
 - **FRKOMM-FR-03.1** Ramverket ska exponera `GET /{handlaggningId}` som returnerar
   den information handläggaren behöver för att hantera kommunicerings uppgifter. Informationen
-  hämtas via regelns implementation av `RegelKommuniceringService`.
+  hämtas via regelns implementation av `RegelKommuniceringService`, tillsammans med
+  informationsaccessdata enligt FRKOMM-FR-07.
 - **FRKOMM-FR-03.2** Ramverket ska exponera `PATCH /{handlaggningId}` för
   registrering av uppdaterad information för bestridda uppgifter via regelns implementation av
   `RegelKommuniceringService`.
@@ -109,6 +110,29 @@ underliggande ramverk upprepas inte.
 
 - **FRKOMM-FR-06.1** Användarens identitet ska verifieras vid REST förfrågan via `IdentityAdapter.getIdentity()`. Om identity-tjänsten svarar med 401 så ska HTTP 401 returneras. Övriga fel ska hanteras enligt FRKOMM-FR-03.12 till FRKOMM-FR-03.15.
 - **FRKOMM-FR-06.2** Om användarens identitet kunde verifieras så ska den sparas till UserIdentityHolder för att enkelt kunna återanvändas utan att en ny förfrågan till identity-tjänsten ska behövas.
+
+### FRKOMM-FR-07 — Informationsaccessdata i GET-svaret
+
+En BFF som visar regelns data ska kunna publicera ett informationsaccess-event enligt
+`rimfrost-service-informationsaccess-asyncapi`. Eventet ska ange
+handläggare, processinstans, uppgiftsinstans, uppgiftsspecifikation, tidpunkt och den data
+som visas i GUI:t. Individerna listas inte separat, eftersom personuppgifterna finns i den
+data som visas. Processinstansen anges med `handlaggningId`, som BFF:en redan har, tillsammans
+med `uppgiftId`. Svaret bär därför den data som BFF:en inte själv har (FKPOC-1103).
+
+- **FRKOMM-FR-07.1** `GET /{handlaggningId}` ska returnera ett objekt, en container, med två
+  fält: `data` med regelns eget svar oförändrat, och `informationsaccess` med
+  informationsaccessdata. Fältet `data` är det som BFF:en lägger i eventets
+  `visadInformation`.
+- **FRKOMM-FR-07.2** `informationsaccess.uppgiftId` ska vara OUL-uppgiftens id från lagrad
+  korrelationsdata. Det anger uppgiftsinstansen. Om korrelationsdata saknas ska ramverket
+  returnera HTTP 500, eftersom uppgiften inte kan identifieras utan den.
+- **FRKOMM-FR-07.3** `informationsaccess.regelId` och `informationsaccess.regelVersion` ska hämtas
+  från regelns `config.yaml`.
+- **FRKOMM-FR-07.4** Containern ska bara returneras när SID-kontrollen har passerat.
+- **FRKOMM-FR-07.5** `informationsaccess.anvandare` ska vara den inloggade handläggarens
+  identitet (`typId` och `varde`), som ramverket hämtar ur anropets token. Då behöver
+  BFF:en inte själv tolka token.
 
 ## 2. Icke-funktionella krav
 
