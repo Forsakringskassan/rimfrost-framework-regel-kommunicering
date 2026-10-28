@@ -20,7 +20,6 @@ import se.fk.rimfrost.framework.regel.kommunicering.logic.RegelKommuniceringRequ
 import se.fk.rimfrost.framework.regel.kommunicering.logic.RegelKommuniceringService;
 import se.fk.rimfrost.framework.regel.kommunicering.logic.exception.CorrelationDataReadException;
 import se.fk.rimfrost.framework.regel.kommunicering.logic.exception.EndOulUppgiftException;
-import se.fk.rimfrost.framework.regel.kommunicering.logic.exception.HandlaggningReadException;
 import se.fk.rimfrost.framework.regel.kommunicering.logic.exception.UppgiftIncompleteException;
 import se.fk.rimfrost.framework.regel.oul.logic.entity.ImmutableOulCorrelationData;
 import se.fk.rimfrost.framework.regel.oul.logic.entity.OulUppgiftSpec;
@@ -139,19 +138,17 @@ class RegelKommuniceringRequestHandlerTest extends AbstractRegelKommuniceringTes
    @DisplayName("FRKOMM-FR-01.4: Kafka response with utfall from uppgift is sent on successful kommunicering")
    void should_send_response_on_successful_done_handling() throws Exception
    {
-      var handlaggningId = UUID.randomUUID();
       var handlaggning = createHandlaggning();
+      var handlaggningId = handlaggning.id();
 
-      Mockito.when(handlaggningAdapter.readHandlaggning(handlaggningId)).thenReturn(handlaggning);
       Mockito.doNothing().when(oulUppgiftService).endOulUppgift(eq(DEFAULT_UPPGIFT_ID), Mockito.any());
       Mockito.doNothing().when(oulUppgiftService).cleanupCorrelation(handlaggningId);
       Mockito.when(handlaggningAdapter.updateHandlaggning(Mockito.any())).thenReturn(Mockito.mock(HandlaggningUpdate.class));
 
-      regelKommuniceringRequestHandler.handleKommuniceringDone(handlaggningId);
+      regelKommuniceringRequestHandler.handleKommuniceringDone(handlaggning);
       var response = regelKafkaConnector.waitForRegelResponse();
 
       assertEquals(Utfall.JA, response.getData().getUtfall());
-      verify(handlaggningAdapter).readHandlaggning(handlaggningId);
       verify(oulUppgiftService).endOulUppgift(eq(DEFAULT_UPPGIFT_ID), Mockito.any());
       verify(oulUppgiftService).cleanupCorrelation(handlaggningId);
       verify(handlaggningAdapter).updateHandlaggning(Mockito.any());
@@ -161,7 +158,6 @@ class RegelKommuniceringRequestHandlerTest extends AbstractRegelKommuniceringTes
    @DisplayName("FRKOMM-FR-03.5: UppgiftIncompleteException is thrown if regelutfall is not set")
    void should_throw_uppgift_incomplete_exception_on_regelutfall_not_set() throws Exception
    {
-      var handlaggningId = UUID.randomUUID();
       var handlaggning = createHandlaggning();
 
       var correlationData = createDefaultOulCorrelationData();
@@ -177,63 +173,46 @@ class RegelKommuniceringRequestHandlerTest extends AbstractRegelKommuniceringTes
             .build();
 
       Mockito.when(oulUppgiftService.getCorrelationData(Mockito.any())).thenReturn(updatedCorrelationData);
-      Mockito.when(handlaggningAdapter.readHandlaggning(handlaggningId)).thenReturn(handlaggning);
 
       assertThrows(UppgiftIncompleteException.class,
-            () -> regelKommuniceringRequestHandler.handleKommuniceringDone(handlaggningId));
+            () -> regelKommuniceringRequestHandler.handleKommuniceringDone(handlaggning));
    }
 
    @Test
    @DisplayName("FRKOMM-FR-03.6: CorrelationDataReadException is thrown if correlation data is missing")
    void should_throw_correlation_data_read_exception_on_missing_data_at_done_handling() throws Exception
    {
-      var handlaggningId = UUID.randomUUID();
+      var handlaggning = createHandlaggning();
+      var handlaggningId = handlaggning.id();
 
       Mockito.when(oulUppgiftService.getCorrelationData(handlaggningId)).thenReturn(null);
 
       assertThrows(CorrelationDataReadException.class,
-            () -> regelKommuniceringRequestHandler.handleKommuniceringDone(handlaggningId));
-   }
-
-   @Test
-   @DisplayName("HandlaggningReadException is thrown on failure to read handlaggning")
-   void should_throw_handlaggning_read_exception_on_handlaggning_read_failure_at_done_handling() throws Exception
-   {
-      var handlaggningId = UUID.randomUUID();
-
-      Mockito.when(handlaggningAdapter.readHandlaggning(handlaggningId))
-            .thenThrow(new HandlaggningException(HandlaggningException.ErrorType.UNEXPECTED_ERROR, ""));
-
-      assertThrows(HandlaggningReadException.class,
-            () -> regelKommuniceringRequestHandler.handleKommuniceringDone(handlaggningId));
+            () -> regelKommuniceringRequestHandler.handleKommuniceringDone(handlaggning));
    }
 
    @Test
    @DisplayName("EndOulUppgiftException is thrown on failure to end oul uppgift")
    void should_throw_end_oul_uppgift_exception_on_oul_uppgift_end_failure_at_done_handling() throws Exception
    {
-      var handlaggningId = UUID.randomUUID();
       var handlaggning = createHandlaggning();
 
-      Mockito.when(handlaggningAdapter.readHandlaggning(handlaggningId)).thenReturn(handlaggning);
       Mockito.doThrow(new OulServiceException(OulServiceException.ErrorType.UNEXPECTED_ERROR, "")).when(oulUppgiftService)
             .endOulUppgift(eq(DEFAULT_UPPGIFT_ID), Mockito.any());
 
-      assertThrows(EndOulUppgiftException.class, () -> regelKommuniceringRequestHandler.handleKommuniceringDone(handlaggningId));
+      assertThrows(EndOulUppgiftException.class, () -> regelKommuniceringRequestHandler.handleKommuniceringDone(handlaggning));
    }
 
    @Test
    @DisplayName("FRKOMM-FR-03.8: 404 end fault is treated as 200 at end oul uppgift")
    void should_not_throw_end_oul_uppgift_exception_on_oul_uppgift_end_failure_with_404_at_done_handling() throws Exception
    {
-      var handlaggningId = UUID.randomUUID();
       var handlaggning = createHandlaggning();
 
-      Mockito.when(handlaggningAdapter.readHandlaggning(handlaggningId)).thenReturn(handlaggning);
       Mockito.doThrow(new OulServiceException(OulServiceException.ErrorType.NOT_FOUND, "")).when(oulUppgiftService)
             .endOulUppgift(eq(DEFAULT_UPPGIFT_ID), Mockito.any());
 
-      regelKommuniceringRequestHandler.handleKommuniceringDone(handlaggningId);
+      regelKommuniceringRequestHandler.handleKommuniceringDone(handlaggning);
 
       var response = regelKafkaConnector.waitForRegelResponse();
       assertEquals(Utfall.JA, response.getData().getUtfall());
@@ -243,19 +222,17 @@ class RegelKommuniceringRequestHandlerTest extends AbstractRegelKommuniceringTes
    @DisplayName("Handlaggning update failure does not throw exception")
    void should_not_throw_on_handlaggning_update_failure_at_done_handling() throws Exception
    {
-      var handlaggningId = UUID.randomUUID();
       var handlaggning = createHandlaggning();
+      var handlaggningId = handlaggning.id();
 
-      Mockito.when(handlaggningAdapter.readHandlaggning(handlaggningId)).thenReturn(handlaggning);
       Mockito.doNothing().when(oulUppgiftService).endOulUppgift(eq(DEFAULT_UPPGIFT_ID), Mockito.any());
       Mockito.doNothing().when(oulUppgiftService).cleanupCorrelation(handlaggningId);
       Mockito.when(handlaggningAdapter.updateHandlaggning(Mockito.any())).thenThrow(new RuntimeException());
 
-      regelKommuniceringRequestHandler.handleKommuniceringDone(handlaggningId);
+      regelKommuniceringRequestHandler.handleKommuniceringDone(handlaggning);
       var response = regelKafkaConnector.waitForRegelResponse();
 
       assertEquals(Utfall.JA, response.getData().getUtfall());
-      verify(handlaggningAdapter).readHandlaggning(handlaggningId);
       verify(oulUppgiftService).endOulUppgift(eq(DEFAULT_UPPGIFT_ID), Mockito.any());
       verify(oulUppgiftService).cleanupCorrelation(handlaggningId);
    }
@@ -264,7 +241,6 @@ class RegelKommuniceringRequestHandlerTest extends AbstractRegelKommuniceringTes
    @DisplayName("IllegalArgumentException is thrown if regelutfall is set to an unknown value")
    void should_throw_illegal_argument_exception_on_unknown_regelutfall_value() throws HandlaggningException
    {
-      var handlaggningId = UUID.randomUUID();
       var handlaggning = createHandlaggning();
 
       var correlationData = createDefaultOulCorrelationData();
@@ -280,9 +256,8 @@ class RegelKommuniceringRequestHandlerTest extends AbstractRegelKommuniceringTes
             .build();
 
       Mockito.when(oulUppgiftService.getCorrelationData(Mockito.any())).thenReturn(updatedCorrelationData);
-      Mockito.when(handlaggningAdapter.readHandlaggning(handlaggningId)).thenReturn(handlaggning);
 
       assertThrows(IllegalArgumentException.class,
-            () -> regelKommuniceringRequestHandler.handleKommuniceringDone(handlaggningId));
+            () -> regelKommuniceringRequestHandler.handleKommuniceringDone(handlaggning));
    }
 }

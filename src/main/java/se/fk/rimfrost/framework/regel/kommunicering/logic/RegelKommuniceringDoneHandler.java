@@ -1,8 +1,8 @@
 package se.fk.rimfrost.framework.regel.kommunicering.logic;
 
-import java.util.UUID;
+import se.fk.rimfrost.framework.handlaggning.model.Handlaggning;
 
 public interface RegelKommuniceringDoneHandler
 {
-   void handleKommuniceringDone(UUID handlaggningId);
+   void handleKommuniceringDone(Handlaggning handlaggning);
 }
