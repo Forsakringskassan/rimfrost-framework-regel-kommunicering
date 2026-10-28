@@ -97,6 +97,12 @@ underliggande ramverk upprepas inte.
   `Authorization`-huvud) ska handläggaren behandlas som om de saknar SID-rättigheter — ramverket
   returnerar HTTP 403 och loggar en varning.
 
+### FRKOMM-FR-05 — Processvy-länk till OUL
+
+- **FRKOMM-FR-05.1** När ramverket bygger `OulUppgiftSpec` ska regelanropets `processvyUrl` skickas med,
+  på samma sätt som `aktivitetId`. Saknas `processvyUrl` i regelanropet skapas uppgiften ändå, utan
+  processvy-länk.
+
 ## 2. Icke-funktionella krav
 
 ### FRKOMM-NFR-01 — Tillförlitlighet
