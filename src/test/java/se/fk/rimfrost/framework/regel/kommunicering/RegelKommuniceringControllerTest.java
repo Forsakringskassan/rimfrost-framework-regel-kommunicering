@@ -194,7 +194,7 @@ public class RegelKommuniceringControllerTest extends AbstractRegelKommunicering
    }
 
    @Test
-   @DisplayName("FRKOMM-FR-07.1: GET returns the rule's response in data together with informationsaccess")
+   @DisplayName("FRKOMM-FR-08.1: GET returns the rule's response in data together with informationsaccess")
    void should_return_rule_response_as_data_with_informationsaccess_on_get() throws Exception
    {
       var handlaggningId = givenReadableHandlaggning();
@@ -208,7 +208,7 @@ public class RegelKommuniceringControllerTest extends AbstractRegelKommunicering
    }
 
    @Test
-   @DisplayName("FRKOMM-FR-07.2: informationsaccess.uppgiftId is the OUL uppgift id from the correlation data")
+   @DisplayName("FRKOMM-FR-08.2: informationsaccess.uppgiftId is the OUL uppgift id from the correlation data")
    void should_return_oul_uppgift_id_in_informationsaccess_on_get() throws Exception
    {
       var handlaggningId = givenReadableHandlaggning();
@@ -221,7 +221,7 @@ public class RegelKommuniceringControllerTest extends AbstractRegelKommunicering
    }
 
    @Test
-   @DisplayName("FRKOMM-FR-07.2: GET returns 500 and does not read data when no correlation data is stored")
+   @DisplayName("FRKOMM-FR-08.2: GET returns 500 and does not read data when no correlation data is stored")
    void should_return_500_without_correlation_data_on_get() throws Exception
    {
       var handlaggningId = givenReadableHandlaggning();
@@ -236,7 +236,7 @@ public class RegelKommuniceringControllerTest extends AbstractRegelKommunicering
    }
 
    @Test
-   @DisplayName("FRKOMM-FR-07.3: informationsaccess.regelId and regelVersion come from the rule's config.yaml")
+   @DisplayName("FRKOMM-FR-08.3: informationsaccess.regelId and regelVersion come from the rule's config.yaml")
    void should_return_regel_id_and_version_from_config_on_get() throws Exception
    {
       var handlaggningId = givenReadableHandlaggning();
@@ -251,7 +251,7 @@ public class RegelKommuniceringControllerTest extends AbstractRegelKommunicering
    }
 
    @Test
-   @DisplayName("FRKOMM-FR-07.5: informationsaccess.anvandare is the inloggad handläggare's identity")
+   @DisplayName("FRKOMM-FR-08.5: informationsaccess.anvandare is the inloggad handläggare's identity")
    void should_return_handlaggare_identity_in_informationsaccess_on_get() throws Exception
    {
       var handlaggningId = givenReadableHandlaggning();

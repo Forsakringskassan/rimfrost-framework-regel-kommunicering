@@ -193,7 +193,7 @@ public abstract class RegelKommuniceringController<T, Y>
    }
 
    /**
-    * Builds the informationsaccess data returned alongside the rule-specific response (FRKOMM-FR-07).
+    * Builds the informationsaccess data returned alongside the rule-specific response (FRKOMM-FR-08).
     * Runs after {@link RegelAccessGuard#verifyAccess}, so correlation data and the handläggare's
     * identity are already known to be present.
     */
