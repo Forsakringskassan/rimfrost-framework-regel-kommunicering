@@ -31,7 +31,6 @@ import se.fk.rimfrost.framework.regel.oul.logic.exception.OulServiceException;
 import se.fk.rimfrost.framework.regel.presentation.kafka.RegelRequestHandlerInterface;
 
 import java.time.OffsetDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -61,7 +60,6 @@ public class RegelKommuniceringRequestHandler extends RegelRequestHandlerBase
          var spec = ImmutableOulUppgiftSpec.builder()
                .handlaggningId(request.handlaggningId())
                .handlaggning(handlaggning)
-               .replyTo(request.replyTo())
                .cloudEventData(cloudEvent)
                .cloudEventAttributes(CloudEventAttributesMapper.toAttributes(cloudEvent))
                .regel(regelConfig.getSpecifikation().getNamn())
@@ -88,7 +86,7 @@ public class RegelKommuniceringRequestHandler extends RegelRequestHandlerBase
          {
             regelErrorInformation = ex.getRegelErrorInformation();
          }
-         sendErrorResponse(request.handlaggningId(), cloudEvent, regelErrorInformation, request.replyTo());
+         sendErrorResponse(request.handlaggningId(), cloudEvent, regelErrorInformation);
       }
    }
 
@@ -100,7 +98,7 @@ public class RegelKommuniceringRequestHandler extends RegelRequestHandlerBase
 
       endOulUppgift(correlationData.oulUppgiftId(), handlaggning.id());
 
-      sendRegelSuccessResponse(handlaggning.id(), correlationData.cloudEventData(), utfall, correlationData.replyTopic());
+      sendRegelSuccessResponse(handlaggning.id(), correlationData.cloudEventData(), utfall);
 
       oulUppgiftService.cleanupCorrelation(handlaggning.id());
 
@@ -121,7 +119,7 @@ public class RegelKommuniceringRequestHandler extends RegelRequestHandlerBase
 
    private void sendRegelSuccessResponse(UUID handlaggningId,
          CloudEventData cloudEventData,
-         Utfall utfall, String replyTopic)
+         Utfall utfall)
    {
       try
       {
@@ -139,7 +137,7 @@ public class RegelKommuniceringRequestHandler extends RegelRequestHandlerBase
                .type(cloudEventData.type())
                .source(cloudEventData.source())
                .build();
-         regelKafkaProducer.sendRegelResponse(regelResponse, Objects.requireNonNull(replyTopic));
+         regelKafkaProducer.sendRegelResponse(regelResponse);
       }
       catch (IllegalStateException e)
       {

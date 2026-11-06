@@ -39,8 +39,7 @@ import java.util.UUID;
  * <ul>
  *   <li>{@code createOulUppgift(any())} — returns a pre-built {@code OperativUppgift}</li>
  *   <li>{@code getCorrelationData(any())} — returns a pre-built {@code OulCorrelationData}
- *       with the configured response topic as {@code replyTopic} and an uppgift assigned to
- *       {@code ID_TYP}/{@code ID_VARDE}</li>
+ *       with an uppgift assigned to {@code ID_TYP}/{@code ID_VARDE}</li>
  *   <li>{@code IdentityAdapter.getIdentity(any())} — returns {@code ID_TYP}/{@code ID_VARDE}</li>
  *   <li>{@code endOulUppgift} and {@code cleanupCorrelation} — Mockito void defaults (do nothing)</li>
  * </ul>
@@ -158,7 +157,6 @@ public abstract class AbstractRegelKommuniceringTestBase extends RegelTestBase
       return ImmutableOulCorrelationData.builder()
             .oulUppgiftId(DEFAULT_UPPGIFT_ID)
             .uppgift(uppgift)
-            .replyTopic(responseTopic)
             .cloudEventData(cloudEventData)
             .build();
    }

@@ -79,7 +79,7 @@ class RegelKommuniceringRequestHandlerTest extends AbstractRegelKommuniceringTes
       var captor = ArgumentCaptor.forClass(OulUppgiftSpec.class);
       Mockito.doNothing().when(oulUppgiftService).createOulUppgift(captor.capture());
 
-      regelKafkaConnector.sendRegelRequest(handlaggningId.toString(), responseTopic);
+      regelKafkaConnector.sendRegelRequest(handlaggningId.toString());
 
       verify(handlaggningAdapter, timeout(5000)).readHandlaggning(handlaggningId);
       verify(oulUppgiftService, timeout(5000)).createOulUppgift(Mockito.any());
@@ -88,7 +88,6 @@ class RegelKommuniceringRequestHandlerTest extends AbstractRegelKommuniceringTes
       assertEquals(handlaggningId, oulUppgiftSpec.handlaggningId());
       assertNotNull(oulUppgiftSpec.aktivitetId());
       assertNotNull(oulUppgiftSpec.handlaggning());
-      assertEquals(responseTopic, oulUppgiftSpec.replyTo());
       assertNotNull(oulUppgiftSpec.cloudEventData());
       assertNotNull(oulUppgiftSpec.cloudEventAttributes());
       assertEquals("TestUppgiftNamn", oulUppgiftSpec.regel());
@@ -114,7 +113,7 @@ class RegelKommuniceringRequestHandlerTest extends AbstractRegelKommuniceringTes
       var captor = ArgumentCaptor.forClass(OulUppgiftSpec.class);
       Mockito.doNothing().when(oulUppgiftService).createOulUppgift(captor.capture());
 
-      var payload = RegelTestData.newRegelRequestMessagePayload(handlaggningId.toString(), responseTopic);
+      var payload = RegelTestData.newRegelRequestMessagePayload(handlaggningId.toString());
       payload.getData().setProcessvyUrl("/process/vah");
       inMemoryConnector.source(RegelKafkaConnector.regelRequestsChannel).send(payload);
 
@@ -134,7 +133,7 @@ class RegelKommuniceringRequestHandlerTest extends AbstractRegelKommuniceringTes
 
       Mockito.when(handlaggningAdapter.readHandlaggning(handlaggningId)).thenThrow(new RuntimeException());
 
-      regelKafkaConnector.sendRegelRequest(handlaggningId.toString(), responseTopic);
+      regelKafkaConnector.sendRegelRequest(handlaggningId.toString());
       var response = regelKafkaConnector.waitForRegelResponse();
 
       assertEquals(Utfall.ERROR, response.getData().getUtfall());
@@ -154,7 +153,7 @@ class RegelKommuniceringRequestHandlerTest extends AbstractRegelKommuniceringTes
       Mockito.when(handlaggningAdapter.readHandlaggning(handlaggningId)).thenReturn(handlaggning);
       Mockito.doThrow(new RuntimeException()).when(oulUppgiftService).createOulUppgift(Mockito.any());
 
-      regelKafkaConnector.sendRegelRequest(handlaggningId.toString(), responseTopic);
+      regelKafkaConnector.sendRegelRequest(handlaggningId.toString());
       var response = regelKafkaConnector.waitForRegelResponse();
 
       assertEquals(Utfall.ERROR, response.getData().getUtfall());
