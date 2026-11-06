@@ -2,6 +2,12 @@
 
 Changelog of rimfrost-framework-regel-kommunicering.
 
+## 0.1.0 (2026-11-06)
+
+### Features
+
+-  Remove replyTo and bump dependencies ([65437](https://github.com/Forsakringskassan/rimfrost-framework-regel-kommunicering/commit/654376a10cc45d0) Lars Persson)  
+
 ## 0.0.2 (2026-11-02)
 
 ### Bug Fixes
