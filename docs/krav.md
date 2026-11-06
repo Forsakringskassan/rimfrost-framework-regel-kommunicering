@@ -14,7 +14,7 @@ underliggande ramverk upprepas inte.
 
 - **FRKOMM-FR-01.1** Ramverket ska ta emot kommuniceringsförfrågningar från en konfigurerad
   Kafka-topic.
-- **FRKOMM-FR-01.2** Svar ska skickas till den topic som angavs i förfrågans `replyTo`-fält.
+- **FRKOMM-FR-01.2** Svar ska skickas till regelns konfigurerade svars-topic.
 - **FRKOMM-FR-01.3** Vid kommuniceringsutfallet "ACCEPTERAT_BESTRIDANDE" ska svaret ha `utfall = NEJ`.
 - **FRKOMM-FR-01.4** Vid övriga kommuniceringsutfall ska svaret ha `utfall = JA`.
 - **FRKOMM-FR-01.5** Vid fel ska svaret ha `utfall = ERROR` och innehålla `RegelErrorInformation`

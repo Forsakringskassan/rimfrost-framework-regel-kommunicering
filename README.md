@@ -20,7 +20,7 @@ och [rimfrost-framework-regel-oul](https://github.com/Forsakringskassan/rimfrost
 ## Ansvarsområden
 
 - **Kafka request/response** — konsumerar kommuniceringsförfrågningar och skickar svar
-  dynamiskt till förfrågans `replyTo`-topic.
+  till regelns konfigurerade svars-topic.
 - **REST-flöde för kommunicering** — exponerar `GET/PATCH /{handlaggningId}`, `POST /{handlaggningId}/done`, 
   `PATCH /uppgiftskommentar/{handlaggningId}` och `PATCH /kommuniceringsutfall/{handlaggningId}` för handläggarportalen.
 - **Automatisk kontroll av identitet vid REST fråga** — kontrollerar att det identitets-token som inkluderas med `Authorization`-headern är giltigt och sparar läst identitet i `UserIdentityHolder`.

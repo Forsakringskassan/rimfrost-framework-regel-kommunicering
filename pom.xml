@@ -34,31 +34,26 @@
       <artifactId>quarkus-arc</artifactId>
     </dependency>
     <dependency>
-      <groupId>se.fk.rimfrost.framework.regel</groupId>
-      <artifactId>rimfrost-framework-regel</artifactId>
-      <version>1.5.0</version>
+      <groupId>se.fk.rimfrost.framework.regel.oul</groupId>
+      <artifactId>rimfrost-framework-regel-oul</artifactId>
+      <version>0.3.0</version>
     </dependency>
     <dependency>
       <groupId>se.fk.rimfrost.framework.regel</groupId>
       <artifactId>rimfrost-framework-regel</artifactId>
-      <version>1.5.0</version>
+      <version>1.6.0</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>se.fk.rimfrost.framework.regel.oul</groupId>
-      <artifactId>rimfrost-framework-regel-oul</artifactId>
-      <version>0.2.0</version>
-    </dependency>
-    <dependency>
       <groupId>se.fk.rimfrost.framework.referensdata</groupId>
       <artifactId>rimfrost-framework-referensdata-interface</artifactId>
-      <version>0.0.1</version>
+      <version>1.1.1</version>
     </dependency>
     <dependency>
       <groupId>se.fk.rimfrost.framework.regel.oul</groupId>
       <artifactId>rimfrost-framework-regel-oul-openapi-jaxrs-spec</artifactId>
-      <version>0.0.3</version>
+      <version>0.0.4</version>
     </dependency>
     <dependency>
       <groupId>se.fk.rimfrost.framework.regel.uppgiftskommentar</groupId>
@@ -73,7 +68,7 @@
     <dependency>
       <groupId>se.fk.rimfrost.adapter.permissions</groupId>
       <artifactId>rimfrost-adapter-permissions</artifactId>
-      <version>0.0.1</version>
+      <version>0.0.3</version>
     </dependency>
     <dependency>
       <groupId>se.fk.rimfrost.adapter.identity</groupId>
