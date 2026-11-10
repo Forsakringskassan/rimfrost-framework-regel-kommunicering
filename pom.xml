@@ -36,12 +36,12 @@
     <dependency>
       <groupId>se.fk.rimfrost.framework.regel.oul</groupId>
       <artifactId>rimfrost-framework-regel-oul</artifactId>
-      <version>0.3.0</version>
+      <version>0.3.1</version>
     </dependency>
     <dependency>
       <groupId>se.fk.rimfrost.framework.regel</groupId>
       <artifactId>rimfrost-framework-regel</artifactId>
-      <version>1.6.0</version>
+      <version>1.6.1</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
