@@ -2,6 +2,12 @@
 
 Changelog of rimfrost-framework-regel-kommunicering.
 
+## 0.1.1 (2026-11-11)
+
+### Bug Fixes
+
+-  Handle send faults after rimfrost-framework-regel 1.6.1 change ([d66d1](https://github.com/Forsakringskassan/rimfrost-framework-regel-kommunicering/commit/d66d155989f2f0a) Lars Persson)  
+
 ## 0.1.0 (2026-11-06)
 
 ### Features
