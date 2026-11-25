@@ -16,7 +16,6 @@ import se.fk.rimfrost.adapter.permissions.adapter.PermissionsAdapter;
 import se.fk.rimfrost.adapter.permissions.adapter.PermissionsException;
 import se.fk.rimfrost.framework.handlaggning.adapter.HandlaggningAdapter;
 import se.fk.rimfrost.framework.handlaggning.model.Handlaggning;
-import se.fk.rimfrost.framework.handlaggning.model.Uppgift;
 import se.fk.rimfrost.framework.handlaggning.model.Yrkande;
 import se.fk.rimfrost.adapter.identity.exception.IdentityException;
 import se.fk.rimfrost.framework.regel.kommunicering.logic.RegelKommuniceringService;
@@ -253,13 +252,8 @@ class RegelKommuniceringControllerSidCheckTest extends AbstractRegelKommunicerin
 
    private void givenStoredOulUppgiftId(UUID oulUppgiftId)
    {
-      var utforare = se.fk.rimfrost.framework.handlaggning.model.ImmutableIdtyp.builder().typId(ID_TYP).varde(ID_VARDE)
-            .build();
-      var uppgift = Mockito.mock(Uppgift.class);
-      Mockito.when(uppgift.utforare()).thenReturn(utforare);
       var correlationData = Mockito.mock(OulCorrelationData.class);
       Mockito.when(correlationData.oulUppgiftId()).thenReturn(oulUppgiftId);
-      Mockito.when(correlationData.uppgift()).thenReturn(uppgift);
       Mockito.when(oulUppgiftService.getCorrelationData(any())).thenReturn(correlationData);
    }
 
