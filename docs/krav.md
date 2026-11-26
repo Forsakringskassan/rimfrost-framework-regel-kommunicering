@@ -55,8 +55,8 @@ underliggande ramverk upprepas inte.
   vid uppdatering av handläggning.
 - **FRKOMM-FR-03.11** `PATCH /kommuniceringsutfall/{handlaggningId}` ska svara med HTTP 500 om konflikt fel uppstår
   vid uppdatering av handläggning.
-- **FRKOMM-FR-03.12** REST-anrop mot externa tjänster (SID-tjänsten, identitetstjänst och behörighetstjänsten) ska
-  returnera HTTP 404 om tjänsten svarar med `NOT_FOUND`.
+- **FRKOMM-FR-03.12** REST-anrop mot externa tjänster ska returnera HTTP 404 om tjänsten svarar 
+  med `NOT_FOUND` såvida inte annat beteende definieras av ytterligare krav.
 - **FRKOMM-FR-03.13** REST-anrop mot externa tjänster ska returnera HTTP 400 om tjänsten svarar
   med `BAD_REQUEST`.
 - **FRKOMM-FR-03.14** REST-anrop mot externa tjänster ska returnera HTTP 503 om tjänsten svarar
