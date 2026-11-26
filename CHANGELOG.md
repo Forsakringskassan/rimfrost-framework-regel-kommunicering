@@ -2,6 +2,12 @@
 
 Changelog of rimfrost-framework-regel-kommunicering.
 
+## 0.1.4 (2026-11-26)
+
+### Bug Fixes
+
+-  Use OUL for utforare assignment check ([ee2c8](https://github.com/Forsakringskassan/rimfrost-framework-regel-kommunicering/commit/ee2c8baba3b4ab6) Lars Persson)  
+
 ## 0.1.3 (2026-11-20)
 
 ### Bug Fixes
